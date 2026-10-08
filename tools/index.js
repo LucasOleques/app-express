@@ -1,11 +1,15 @@
 import { firebaseAuth } from "../tools/firebase.js";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  validatePassword
+} from "firebase/auth";
 
 
 function apiKeyMiddleware(req, res, next) {
   let apiKey = req.headers['api_key'];
   if (!apiKey || apiKey !== '123') {
-    res.status(401).send('API key inválida');
+    res.status(401).send('Unauthorized: API key inválida');
     return;
   }
   next();
@@ -25,5 +29,32 @@ function criarUsuarioFirebase (email, senha) {
   });
 }
 
+function loginUsuarioFirebase (email, senha){
+  signInWithEmailAndPassword(firebaseAuth, email, senha)
+  .then((userCredential) => {
+    // Signed in 
+    const user = userCredential.user;
+    // ...
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+  });
+}
 
-export {apiKeyMiddleware, criarUsuarioFirebase};
+async function validaSenhaUsuarioFirebase (senha) {
+  const status = await validatePassword(firebaseAuth, senha);
+  if (!status.isValid) {
+    const needsLowerCase = status.containsLowercaseLetter !== true;
+    return { isValid: false, needsLowerCase};
+  }
+  return { isValid: true };
+}
+
+
+export {
+  apiKeyMiddleware,
+  criarUsuarioFirebase,
+  loginUsuarioFirebase,
+  validaSenhaUsuarioFirebase
+};
