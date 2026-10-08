@@ -1,6 +1,6 @@
 //https://expressjs.com/en/5x/starter/generator/
 
-const express = require('express');
+import express from 'express';
 const app = express();
 const port = 3000;
 const clientes = [];
